@@ -16,6 +16,3 @@ aaplBars = sq.getStockData('AAPL',TimeFrame.Hour,"2021-11-04","2021-11-04",5)
 
 for bar in aaplBars:
     print(bar)
-
-
-print ("test change 1")

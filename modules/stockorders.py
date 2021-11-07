@@ -6,5 +6,3 @@ class StockOrder:
     
     def __init__(self, SEC_KEY, PUB_KEY, BASE_URL):
         self.api = tradeapi.REST(key_id= PUB_KEY, secret_key=SEC_KEY, base_url=BASE_URL)
-
-        print("test change 3")
