@@ -23,4 +23,6 @@ class StockQuery:
             bar_formatted = {'time':bar['t'], 'open':bar['o'], 'close':bar['c'], 'volume':bar['v']}
             stockData.append(bar_formatted)
 
+        print("test change 2")
+
         return stockData
