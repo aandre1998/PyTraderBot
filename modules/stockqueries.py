@@ -2,12 +2,18 @@ import alpaca_trade_api as tradeapi
 from alpaca_trade_api.rest import TimeFrame
 import ast
 
+
 class StockQuery:
     """Provides functions that query the stock market using the Alpaca API.
     Secret key and public key required."""
     
-    def __init__(self, SEC_KEY, PUB_KEY, BASE_URL):
-        self.api = tradeapi.REST(key_id= PUB_KEY, secret_key=SEC_KEY, base_url=BASE_URL)
+
+    def __init__(self, SEC_KEY, PUB_KEY, LIVE_TRADING=False):
+        if LIVE_TRADING:
+            self.api = tradeapi.REST(key_id= PUB_KEY, secret_key=SEC_KEY)
+        else:
+            self.api = tradeapi.REST(key_id= PUB_KEY, secret_key=SEC_KEY, base_url='https://paper-api.alpaca.markets')
+    
     
     def getStockData(self, symbol, timeunit, fromdate, todate, amount):
         """Returns a list of dictionaries containing requested market data (time, open, close, volume).

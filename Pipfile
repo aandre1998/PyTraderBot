@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 alpaca-trade-api = "*"
+schedule = "*"
 
 [dev-packages]
 
