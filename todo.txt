@@ -1,0 +1,1 @@
+[8 Nov 21] [API] Change API usage to IEX real time data. May require major changes to stockqueries class.

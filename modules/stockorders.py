@@ -15,9 +15,9 @@ class StockOrder:
 
     def buyStock(self, symbol, quantity):
         """Send a buy order to the stock market through the Alpaca API."""
-        print("Buying " + quantity + " shares of " + symbol)
+        print("Buying $" + str(quantity) + " worth of " + symbol)
 
 
     def sellStock(self, symbol, quantity):
         """Send a sell order to the stock market through the Alpaca API."""
-        print("Selling " + quantity + " shares of " + symbol)
+        print("Selling $" + str(quantity) + " worth of " + symbol)

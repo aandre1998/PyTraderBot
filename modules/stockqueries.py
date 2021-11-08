@@ -15,6 +15,18 @@ class StockQuery:
             self.api = tradeapi.REST(key_id= PUB_KEY, secret_key=SEC_KEY, base_url='https://paper-api.alpaca.markets')
     
     
+    def getAccountInfo(self):
+        """Get account info such as cash available, buying power, etc."""
+
+        account_info = self.api.get_account()
+        account_info = str(account_info)
+        account_info = account_info[8:len(account_info)-1]
+        account_info = ast.literal_eval(account_info)
+        
+        return account_info
+
+
+
     def getStockData(self, symbol, timeunit, fromdate, todate, amount):
         """Returns a list of dictionaries containing requested market data (time, open, close, volume).
         Each dictionary represents one bar of data."""
