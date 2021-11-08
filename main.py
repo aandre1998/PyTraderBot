@@ -6,8 +6,8 @@ from modules.stockqueries import StockQuery
 from modules.stockorders import StockOrder
 
 ### Config ###
-SEC_KEY = '' # Secret Key Here
-PUB_KEY = '' # Public Key Here
+SEC_KEY = '7FeEADwWiJHNqDZIO3CIOKOXQ25fybDH2R1uQ9Eu' # Secret Key Here
+PUB_KEY = 'PKYARJ32CZ88U9YJAKA0' # Public Key Here
 LIVE_TRADING = False # For live trading, set to True. For paper trading, set to False.
 
 sq = StockQuery(SEC_KEY, PUB_KEY, LIVE_TRADING)
@@ -22,7 +22,7 @@ def job1():
     aaplBars = sq.getStockData('AAPL',TimeFrame.Hour,"2021-11-04","2021-11-04",5)
     print(aaplBars)
 
-schedule.every().day.at("14:30").do(job1)
+schedule.every().day.at("09:35").do(job1)
 
 
 def job2():
@@ -30,7 +30,7 @@ def job2():
 
     print("I'm working on job 2...")
 
-schedule.every().day.at("14:45").do(job2)
+schedule.every().day.at("09:36").do(job2)
 
 
 def job3():
@@ -38,7 +38,7 @@ def job3():
 
     print("I'm working on job 3...")
 
-schedule.every().day.at("08:30").do(job3)
+schedule.every().day.at("09:37").do(job3)
 
 
 ### Run jobs until program is stopped ###
