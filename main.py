@@ -55,7 +55,7 @@ schedule.every().day.at("13:53").do(job3)
 
 ### Run jobs until program is stopped ###
 
-#print(queries.getStockData('AAPL',TimeFrame.Hour,today_date,today_date,5)) this does not work because
+#print(queries.getStockData('AAPL',TimeFrame.Hour,today,today,5)) this does not work because
 #API does not allow data from past 15 mins.
 
 while True:
