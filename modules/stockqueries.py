@@ -1,6 +1,7 @@
 import alpaca_trade_api as tradeapi
 from alpaca_trade_api.rest import TimeFrame
 import ast
+from websocket import create_connection
 
 
 class StockQuery:
@@ -8,11 +9,16 @@ class StockQuery:
     Secret key and public key required."""
     
 
-    def __init__(self, SEC_KEY, PUB_KEY, LIVE_TRADING=False):
+    def __init__(self, SEC_KEY, PUB_KEY, LIVE_TRADING):
+        self.SEC_KEY = SEC_KEY
+        self.PUB_KEY = PUB_KEY
+
         if LIVE_TRADING:
             self.api = tradeapi.REST(key_id= PUB_KEY, secret_key=SEC_KEY)
         else:
             self.api = tradeapi.REST(key_id= PUB_KEY, secret_key=SEC_KEY, base_url='https://paper-api.alpaca.markets')
+        
+        
     
     
     def getAccountInfo(self):
@@ -42,3 +48,21 @@ class StockQuery:
             stockData.append(bar_formatted)
 
         return stockData
+
+    
+    def getRealTime(self):
+        iex = create_connection("wss://stream.data.alpaca.markets/v2/iex")
+        print(iex.recv())
+
+        iex_auth = {"action": "auth", "key": self.PUB_KEY, "secret": self.SEC_KEY}
+        iex_auth = str(iex_auth).replace("'","\042") #convert dict to string and replace ' with "
+        iex.send(iex_auth)
+        print(iex.recv())
+
+        subscribe = {"action":"subscribe","bars":["AAPL","MSFT","TSLA"]}
+        subscribe = str(subscribe).replace("'","\042")
+        iex.send(subscribe)
+        print(iex.recv())
+        #iex.send({"action":"subscribe","trades":["AAPL"],"quotes":["AMD","CLDR"],"bars":["AAPL","VOO"]})
+
+        iex.close()

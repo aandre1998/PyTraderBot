@@ -6,8 +6,8 @@ from modules.stockqueries import StockQuery
 from modules.stockorders import StockOrder
 
 ### Config ###
-SEC_KEY = '' # Secret Key Here
-PUB_KEY = '' # Public Key Here
+SEC_KEY = '7FeEADwWiJHNqDZIO3CIOKOXQ25fybDH2R1uQ9Eu' # Secret Key Here
+PUB_KEY = 'PKYARJ32CZ88U9YJAKA0' # Public Key Here
 LIVE_TRADING = False # For live trading, set to True. For paper trading, set to False.
 
 queries = StockQuery(SEC_KEY, PUB_KEY, LIVE_TRADING)
@@ -55,8 +55,9 @@ schedule.every().day.at("13:53").do(job3)
 
 ### Run jobs until program is stopped ###
 
-#print(queries.getStockData('AAPL',TimeFrame.Hour,today,today,5)) this does not work because
-#API does not allow data from past 15 mins.
+#print(queries.getStockData('AAPL',TimeFrame.Hour,today,today,5))
+
+queries.getRealTime()
 
 while True:
     schedule.run_pending()

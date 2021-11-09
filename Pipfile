@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 alpaca-trade-api = "*"
 schedule = "*"
+websocket-client = "*"
 
 [dev-packages]
 
