@@ -1,6 +1,8 @@
 import alpaca_trade_api as tradeapi
 from alpaca_trade_api.rest import TimeFrame
 import ast
+import time
+import json
 from websocket import create_connection
 
 
@@ -64,5 +66,11 @@ class StockQuery:
         iex.send(subscribe)
         print(iex.recv())
         #iex.send({"action":"subscribe","trades":["AAPL"],"quotes":["AMD","CLDR"],"bars":["AAPL","VOO"]})
+
+        while True:
+            result = iex.recv()
+            result = json.loads(result)
+            print ("Received '%s'" % result)
+            time.sleep(1)
 
         iex.close()
