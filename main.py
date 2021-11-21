@@ -6,43 +6,68 @@ from modules.stockqueries import StockQuery
 from modules.stockorders import StockOrder
 
 ### Config ###
-SEC_KEY = '7FeEADwWiJHNqDZIO3CIOKOXQ25fybDH2R1uQ9Eu' # Secret Key Here
-PUB_KEY = 'PKYARJ32CZ88U9YJAKA0' # Public Key Here
+SEC_KEY = '' # Secret Key Here
+PUB_KEY = '' # Public Key Here
 LIVE_TRADING = False # For live trading, set to True. For paper trading, set to False.
+stock_list = ['AAPL', 'MSFT', 'GOOG', 'TSLA', 'AMZN'] # This will contain all tickers of interest
 
-queries = StockQuery(SEC_KEY, PUB_KEY, LIVE_TRADING)
+
+queries = StockQuery()
 orders = StockOrder(SEC_KEY, PUB_KEY, LIVE_TRADING)
 
-best_fit_stocks = ['AAPL', 'MSFT', 'GOOG', 'TSLA', 'AMZN'] # This will be an empty list ready for the top 5
-cash_available = int(queries.getAccountInfo()['cash'])
-today = time.strftime("%Y-%m-%d")
+
+cash_available = int(orders.getAccountInfo()['cash']) # cash available to spend in the account
+today = time.strftime("%Y-%m-%d") # Today's date in relevant format
+best_fit_stocks = []
+stock_price_dict = {}
 
 ### Jobs to schedule ###
-
-def job1():
-    """Job 1: Every trading day at 14:30 CST, query market to find 5 best fit stocks"""
-
-    print("I'm working on job 1...")
+def data_collection_job():
+    """Every trading day at 08:30 CST, start collecting price data for list of stocks.
+    This process will end when the schedule is cleared in data_analysis_job at 14:30."""
     
-    for stock in best_fit_stocks: # Get time, open, close, volume for 5 hours of 11-04 for each stock
-        print(stock + " Data")
-        stockBars = queries.getStockData(stock,TimeFrame.Hour,"2021-11-04","2021-11-04",5)
-        for bar in stockBars:
-            print(bar)
+    print("Starting data_collection_job")
 
-schedule.every().day.at("13:51").do(job1)
+    stock_price_dict = queries.createStockPriceDict(stock_list) #initialize dict with empty lists
 
-
-def job2():
-    """Job 2: Every trading day at 14:45 CST, market buy 20% of cash available to each best fit stock"""
-
-    print("I'm working on job 2...")
+    def job1():
+        for stock in stock_list:
+            stock_price_dict[stock].append(queries.getCurrentStockPrice(stock)) #every 15 mins, append lists with current price
+        print(stock_price_dict)
     
-    for stock in best_fit_stocks: # Buy each stock with 20% of cash available
-        orders.buyStock(stock, cash_available/5)
+    job1()
+    schedule.every(15).minutes.do(job1)
+
+schedule.every().day.at("08:30").do(data_collection_job)
 
 
-schedule.every().day.at("13:52").do(job2)
+def data_analysis_job():
+    """Every trading day at 14:30, stop the data_collection_job and analyze the data.
+    Map each data set to a mathematical model and select the 5 stocks with the best scores."""
+
+    schedule.clear() # clear the schedule so the live data collection stops
+
+    # Map each set of data to a mathematical model, create a dict of scores for each stock
+    # model = 5*(#green candles/#total candles) + 2*(daily vol/avg vol) and must be <2% increase on day
+    # if #green > 25 & daily/avg > 1.2 & increase <2%:
+        #model it out, pick best ones
+    # Append best 5 tickers to an empty list - best_fit_stocks
+
+schedule.every().day.at("14:30").do(data_analysis_job)
+
+
+def buy_stocks_job():
+    """Every trading day at 14:45 CST, market buy each best fit stock equally"""
+
+    print("Starting buy_stocks_job")
+    
+    if len(best_fit_stocks) > 0:
+        for stock in best_fit_stocks:
+            orders.buyStock(stock, cash_available/len(best_fit_stocks))
+    else:
+        print("No stocks met the criteria.")
+
+schedule.every().day.at("10:03").do(buy_stocks_job)
 
 
 def job3():
@@ -50,16 +75,12 @@ def job3():
 
     print("I'm working on job 3...")
 
-schedule.every().day.at("13:53").do(job3)
+schedule.every().day.at("17:28").do(job3)
 
 
 ### Run jobs until program is stopped ###
 
-#print(queries.getStockData('AAPL',TimeFrame.Hour,today,today,5))
-
-queries.getRealTime()
-
 while True:
     schedule.run_pending()
     today = time.strftime("%Y-%m-%d")
-    time.sleep(60)
+    time.sleep(1)

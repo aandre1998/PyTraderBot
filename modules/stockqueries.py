@@ -1,76 +1,38 @@
-import alpaca_trade_api as tradeapi
-from alpaca_trade_api.rest import TimeFrame
-import ast
-import time
-import json
-from websocket import create_connection
+import requests
+from bs4 import BeautifulSoup
 
 
 class StockQuery:
-    """Provides functions that query the stock market using the Alpaca API.
-    Secret key and public key required."""
-    
+    """Provides functions that query the stock market by scraping Yahoo Finance.
+    Also provides access to Alpaca account info, secret key and public key required."""
 
-    def __init__(self, SEC_KEY, PUB_KEY, LIVE_TRADING):
-        self.SEC_KEY = SEC_KEY
-        self.PUB_KEY = PUB_KEY
 
-        if LIVE_TRADING:
-            self.api = tradeapi.REST(key_id= PUB_KEY, secret_key=SEC_KEY)
-        else:
-            self.api = tradeapi.REST(key_id= PUB_KEY, secret_key=SEC_KEY, base_url='https://paper-api.alpaca.markets')
+    def getCurrentStockPrice(self, ticker):
+        """Scrapes the Yahoo Finance page for given ticker for current price.
+        More functionality coming soon."""
+
+        stock_list_prices = {}
+
+        url = "https://finance.yahoo.com/quote/" + ticker
+        page = requests.get(url)
+        soup = BeautifulSoup(page.content, "html.parser")
+        results = soup.find('span',attrs={"class": "Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"}) # This produces unexpected content. ERROR
+        fixed_results = results.text.replace(",","")
+
+        try:
+            return float(fixed_results) #This can produce an error if the website returns the wrong data, so handle it here
+        except:
+            return 0.0
+
+
+    def createStockPriceDict(self, stock_list):
+        """Given a list of stocks in format: ["MSFT","AAPL","TSLA"]
+        returns a dict of stocks in format: {"MSFT":[],"AAPL":[],"TSLA":[]}
+        This is to initialize empty lists for each ticker to receive price data throughout the trading day"""
         
-        
-    
-    
-    def getAccountInfo(self):
-        """Get account info such as cash available, buying power, etc."""
+        stock_price_dict = {}
 
-        account_info = self.api.get_account()
-        account_info = str(account_info)
-        account_info = account_info[8:len(account_info)-1]
-        account_info = ast.literal_eval(account_info)
-        
-        return account_info
+        for stock in stock_list:
+            stock_price_dict[stock] = []
 
-
-
-    def getStockData(self, symbol, timeunit, fromdate, todate, amount):
-        """Returns a list of dictionaries containing requested market data (time, open, close, volume).
-        Each dictionary represents one bar of data."""
-        
-        stockData = []
-
-        raw_market_data = self.api.get_bars_iter(symbol, timeunit, fromdate, todate, limit=amount, adjustment='raw')
-        for bar in raw_market_data:
-            bar = str(bar) #convert bar to str
-            bar = bar[4:len(bar)-1] #slice to dict format
-            bar = ast.literal_eval(bar) #create dict from bar
-            bar_formatted = {'time':bar['t'], 'open':bar['o'], 'close':bar['c'], 'volume':bar['v']}
-            stockData.append(bar_formatted)
-
-        return stockData
-
-    
-    def getRealTime(self):
-        iex = create_connection("wss://stream.data.alpaca.markets/v2/iex")
-        print(iex.recv())
-
-        iex_auth = {"action": "auth", "key": self.PUB_KEY, "secret": self.SEC_KEY}
-        iex_auth = str(iex_auth).replace("'","\042") #convert dict to string and replace ' with "
-        iex.send(iex_auth)
-        print(iex.recv())
-
-        subscribe = {"action":"subscribe","bars":["AAPL","MSFT","TSLA"]}
-        subscribe = str(subscribe).replace("'","\042")
-        iex.send(subscribe)
-        print(iex.recv())
-        #iex.send({"action":"subscribe","trades":["AAPL"],"quotes":["AMD","CLDR"],"bars":["AAPL","VOO"]})
-
-        while True:
-            result = iex.recv()
-            result = json.loads(result)
-            print ("Received '%s'" % result)
-            time.sleep(1)
-
-        iex.close()
+        return stock_price_dict

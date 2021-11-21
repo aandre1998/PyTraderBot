@@ -1,5 +1,5 @@
 import alpaca_trade_api as tradeapi
-from datetime import datetime
+import ast
 
 
 class StockOrder:
@@ -12,6 +12,17 @@ class StockOrder:
         else:
             self.api = tradeapi.REST(key_id= PUB_KEY, secret_key=SEC_KEY, base_url='https://paper-api.alpaca.markets')
     
+
+    def getAccountInfo(self):
+        """Get Alpaca account info such as cash available, buying power, etc."""
+
+        account_info = self.api.get_account()
+        account_info = str(account_info)
+        account_info = account_info[8:len(account_info)-1]
+        account_info = ast.literal_eval(account_info)
+        
+        return account_info
+
 
     def buyStock(self, symbol, quantity):
         """Send a buy order to the stock market through the Alpaca API."""
